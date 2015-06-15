@@ -31,6 +31,7 @@
 package com.smartg.java.util;
 
 import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Simple array enumeration.
@@ -54,14 +55,14 @@ import java.util.Enumeration;
  *
  * @param <E>
  */
-public class ArrayEnumeration<E> implements Enumeration<E> {
+public class ArrayIterator<E> implements Enumeration<E>, Iterator<E> {
 
     private final E[] array;
     
     private int index;
     private E next;
 
-    public ArrayEnumeration(E[] array) {
+    public ArrayIterator(E[] array) {
 	this.array = array;
 	goNext();
     }
@@ -81,5 +82,20 @@ public class ArrayEnumeration<E> implements Enumeration<E> {
 	next = null;
 	goNext();
 	return tmp;
+    }
+
+    public boolean hasNext() {
+	return next != null;
+    }
+
+    public E next() {
+	E tmp = next;
+	next = null;
+	goNext();
+	return tmp;
+    }
+
+    public void remove() {
+	throw new UnsupportedOperationException();
     }
 }
