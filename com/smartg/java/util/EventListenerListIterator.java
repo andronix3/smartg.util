@@ -11,7 +11,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 /**
- * Replace horrible loop over event listeners from EventListenerList with an Iterator.
+ * Replace horrible loop over event listeners from EventListenerList with elegant Iterator.
  * @author andronix
  *
  * @param <T>
@@ -57,21 +57,23 @@ public class EventListenerListIterator<T> implements Iterator<T> {
     public void remove() {
 	throw new UnsupportedOperationException();
     }
-
+    
     public static void main(String... s) {
 	EventListenerList list = new EventListenerList();
-	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
-	list.add(ActionListener.class, new ActionListener0());
-	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
-	list.add(ActionListener.class, new ActionListener0());
-	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
-	list.add(ActionListener.class, new ActionListener0());
-	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
-	list.add(ActionListener.class, new ActionListener0());
+	AddToList addToList = new AddToList(list);
+	addToList.add(ChangeListener.class, new ChangeListener0());
+	addToList.add(MouseListener.class, new MouseAdapter() {});
+	ActionListener0 al = new ActionListener0();
+	addToList.add(ActionListener.class, al);
+	addToList.add(ChangeListener.class, new ChangeListener0());
+	addToList.add(MouseListener.class, new MouseAdapter() {});
+	addToList.add(ActionListener.class, al);
+	addToList.add(ChangeListener.class, new ChangeListener0());
+	addToList.add(MouseListener.class, new MouseAdapter() {});
+	addToList.add(ActionListener.class, al);
+	addToList.add(ChangeListener.class, new ChangeListener0());
+	addToList.add(MouseListener.class, new MouseAdapter() {});
+	addToList.add(ActionListener.class, new ActionListener0());
 
 	EventListenerListIterator<ActionListener> iter = new EventListenerListIterator<ActionListener>(ActionListener.class, list);
 	while(iter.hasNext()) {
