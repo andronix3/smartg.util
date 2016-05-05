@@ -427,9 +427,7 @@ public class ThreadManager extends EventSource implements Executor {
 			    current[num] = null;
 			} catch (Throwable ex) {
 			    current[num] = null;
-			    Logger logger = Logger.getLogger("com.smartg.java.util");
-			    logger.throwing("ThreadManager", "run()", ex);
-			    // Debug.error("ThreadManager", "run", ex);
+			    Logger.getLogger(getClass().getName()).warning(ex.getMessage());
 			}
 		    } else {
 			doWait();
