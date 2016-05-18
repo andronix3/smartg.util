@@ -53,86 +53,86 @@ import java.util.Enumeration;
  */
 public class IEnumerator<K, E> implements Enumeration<E> {
 
-    Enumeration<E> current;
-    E next;
+	Enumeration<E> current;
+	E next;
 
-    protected final Stack<Enumeration<E>> stack = new Stack<Enumeration<E>>();
+	protected final Stack<Enumeration<E>> stack = new Stack<Enumeration<E>>();
 
-    protected IFilter<E> filter;
+	protected IFilter<E> filter;
 
-    public IEnumerator(EnumerableEx<K, E> en) {
-	this(en, null);
-    }
+	public IEnumerator(EnumerableEx<K, E> en) {
+		this(en, null);
+	}
 
-    public IEnumerator(EnumerableEx<K, E> en, IFilter<E> filter) {
-	this.filter = filter;
-	current = en.enumeration();
-	moveNext();
-    }
+	public IEnumerator(EnumerableEx<K, E> en, IFilter<E> filter) {
+		this.filter = filter;
+		current = en.enumeration();
+		moveNext();
+	}
 
-    public IEnumerator(Enumeration<E> en) {
-	this(en, null);
-    }
+	public IEnumerator(Enumeration<E> en) {
+		this(en, null);
+	}
 
-    public IEnumerator(Enumeration<E> en, IFilter<E> filter) {
-	this.filter = filter;
-	current = en;
-	moveNext();
-    }
+	public IEnumerator(Enumeration<E> en, IFilter<E> filter) {
+		this.filter = filter;
+		current = en;
+		moveNext();
+	}
 
-    @SuppressWarnings("unchecked")
-    private boolean moveNext0() {
-	if (current != null && current.hasMoreElements()) {
-	    E nextElement = current.nextElement();
+	@SuppressWarnings("unchecked")
+	private boolean moveNext0() {
+		if (current != null && current.hasMoreElements()) {
+			E nextElement = current.nextElement();
 
-	    if (nextElement instanceof EnumerableEx<?, ?>) {
-		stack.push(current);
-		EnumerableEx<K, E> e = (EnumerableEx<K, E>) nextElement;
-		current = e.enumeration();
-		return askFilter(nextElement);
-	    } else if (nextElement instanceof Enumeration<?>) {
-		stack.push(current);
-		current = (Enumeration<E>) nextElement;
-		return askFilter(nextElement);
-	    } else {
-		if (filter != null) {
-		    return askFilter(nextElement);
+			if (nextElement instanceof EnumerableEx<?, ?>) {
+				stack.push(current);
+				EnumerableEx<K, E> e = (EnumerableEx<K, E>) nextElement;
+				current = e.enumeration();
+				return askFilter(nextElement);
+			} else if (nextElement instanceof Enumeration<?>) {
+				stack.push(current);
+				current = (Enumeration<E>) nextElement;
+				return askFilter(nextElement);
+			} else {
+				if (filter != null) {
+					return askFilter(nextElement);
+				}
+				next = nextElement;
+				return true;
+			}
 		}
-		next = nextElement;
+		if (!stack.isEmpty()) {
+			current = stack.pop();
+			return false;
+		}
 		return true;
-	    }
 	}
-	if (!stack.isEmpty()) {
-	    current = stack.pop();
-	    return false;
+
+	private boolean askFilter(E nextElement) {
+		boolean accepted = filter == null || filter.accept(nextElement);
+		if (accepted) {
+			next = nextElement;
+			return true;
+		}
+		return false;
 	}
-	return true;
-    }
 
-    private boolean askFilter(E nextElement) {
-	boolean accepted = filter != null && filter.accept(nextElement);
-	if (accepted) {
-	    next = nextElement;
-	    return true;
+	synchronized void moveNext() {
+		boolean res = false;
+		while (!res) {
+			res = moveNext0();
+		}
 	}
-	return false;
-    }
 
-    synchronized void moveNext() {
-	boolean res = false;
-	while (!res) {
-	    res = moveNext0();
+	public boolean hasMoreElements() {
+		return next != null;
 	}
-    }
 
-    public boolean hasMoreElements() {
-	return next != null;
-    }
-
-    public E nextElement() {
-	E res = next;
-	next = null;
-	moveNext();
-	return res;
-    }
+	public E nextElement() {
+		E res = next;
+		next = null;
+		moveNext();
+		return res;
+	}
 }

@@ -4,16 +4,16 @@ import java.util.Iterator;
 
 public class EmptyIterator<E> implements Iterator<E> {
 
-    public boolean hasNext() {
-	return false;
-    }
+	public boolean hasNext() {
+		return false;
+	}
 
-    public E next() {
-	return null;
-    }
+	public E next() {
+		return null;
+	}
 
-    public void remove() {
-	throw new UnsupportedOperationException();
-    }
+	public void remove() {
+		throw new UnsupportedOperationException();
+	}
 
 }
