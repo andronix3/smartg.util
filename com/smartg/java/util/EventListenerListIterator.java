@@ -11,7 +11,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 /**
- * Replace horrible loop over event listeners from EventListenerList with an Iterator.
+ * Replace horrible loop over event listeners from EventListenerList with user
+ * friendly Iterator.
+ * 
  * @author andronix
  *
  * @param <T>
@@ -61,28 +63,33 @@ public class EventListenerListIterator<T> implements Iterator<T> {
     public static void main(String... s) {
 	EventListenerList list = new EventListenerList();
 	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
+	list.add(MouseListener.class, new MouseAdapter() {
+	});
 	list.add(ActionListener.class, new ActionListener0());
 	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
+	list.add(MouseListener.class, new MouseAdapter() {
+	});
 	list.add(ActionListener.class, new ActionListener0());
 	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
+	list.add(MouseListener.class, new MouseAdapter() {
+	});
 	list.add(ActionListener.class, new ActionListener0());
 	list.add(ChangeListener.class, new ChangeListener0());
-	list.add(MouseListener.class, new MouseAdapter() {});
+	list.add(MouseListener.class, new MouseAdapter() {
+	});
 	list.add(ActionListener.class, new ActionListener0());
 
-	EventListenerListIterator<ActionListener> iter = new EventListenerListIterator<ActionListener>(ActionListener.class, list);
-	while(iter.hasNext()) {
+	EventListenerListIterator<ActionListener> iter = new EventListenerListIterator<ActionListener>(
+		ActionListener.class, list);
+	while (iter.hasNext()) {
 	    System.out.println(iter.next());
 	}
-	
+
     }
 
     private static final class ActionListener0 implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
-	
+
 	}
     }
 
