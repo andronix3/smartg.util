@@ -36,10 +36,10 @@ public class StackTraceUtil {
                 int index = first + i;
                 if (index < stackTrace.length) {
                     String s = stackTrace[index].toString();
-                    Logger.getLogger("Labworks").log(Level.INFO, s);
+                    getLogger().log(Level.INFO, s);
                 }
             }
-            Logger.getLogger("Labworks").log(Level.INFO, "--------------------------");
+            getLogger().log(Level.INFO, "--------------------------");
         }
     }
 
@@ -50,27 +50,40 @@ public class StackTraceUtil {
     public static void warning(Throwable ex) {
         log(Level.WARNING, ex);
     }
-
-    public static void log(Level level, String message, Throwable ex) {
-        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex)});
+    
+    public static void warning(String message) {
+        log(3, Level.WARNING, message);
     }
 
+    public static void log(Level level, String message, Throwable ex) {
+        getLogger().log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex)});
+    }
+
+	private static Logger getLogger() {
+		return Logger.getGlobal();
+	}
+
     public static void log(Level level, Throwable ex) {
-        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex)});
+        getLogger().log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex)});
     }
 
     public static void log(Level level, String message) {
-        Logger.getLogger("Labworks").log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(2));
+    	log(2, level, message);
     }
+    
+    public static void log(int line, Level level, String message) {
+        getLogger().log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(line));
+    }
+
 
     public static void log(Level level, String message, int lineCount) {
         for (int line = 0; line < lineCount; line++) {
-            Logger.getLogger("Labworks").log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(2 + line));
+            getLogger().log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(2 + line));
         }
     }
 
     public static void log(Level level, String message, Object param) {
-        Logger.getLogger("Labworks").log(level, message + " {0} at {1}", new Object[]{param, StackTraceUtil.getStackTraceLine(2)});
+        getLogger().log(level, message + " {0} at {1}", new Object[]{param, StackTraceUtil.getStackTraceLine(2)});
     }
 
 }
