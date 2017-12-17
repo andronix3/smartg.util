@@ -34,9 +34,9 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 /**
- * Simple array enumeration.
- * Do we really need this?
- * Hmm... Good question. We can surely do it without this class, but using this class wie can make it shorter:
+ * Simple array enumeration. Do we really need this? Hmm... Good question. We
+ * can surely do it without this class, but using this class wir can make it
+ * shorter:
  * 
  * Example:
  * 
@@ -51,51 +51,57 @@ import java.util.Iterator;
  *  }
  *  
  *  </code>
+ * 
  * @author andrey
  *
  * @param <E>
  */
 public class ArrayIterator<E> implements Enumeration<E>, Iterator<E> {
 
-    private final E[] array;
-    
-    private int index;
-    private E next;
+	private final E[] array;
 
-    public ArrayIterator(E[] array) {
-	this.array = array;
-	goNext();
-    }
+	private int index;
+	private E next;
 
-    public boolean hasMoreElements() {
-	return next != null;
-    }
-    
-    private void goNext() {
-	while (index < array.length && next == null) {
-	    next = array[index++];
+	public ArrayIterator(E[] array) {
+		this.array = array;
+		goNext();
 	}
-    }
 
-    public E nextElement() {
-	E tmp = next;
-	next = null;
-	goNext();
-	return tmp;
-    }
+	@Override
+	public boolean hasMoreElements() {
+		return next != null;
+	}
 
-    public boolean hasNext() {
-	return next != null;
-    }
+	private void goNext() {
+		while (index < array.length && next == null) {
+			next = array[index++];
+		}
+	}
 
-    public E next() {
-	E tmp = next;
-	next = null;
-	goNext();
-	return tmp;
-    }
+	@Override
+	public E nextElement() {
+		E tmp = next;
+		next = null;
+		goNext();
+		return tmp;
+	}
 
-    public void remove() {
-	throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean hasNext() {
+		return next != null;
+	}
+
+	@Override
+	public E next() {
+		E tmp = next;
+		next = null;
+		goNext();
+		return tmp;
+	}
+
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
+	}
 }

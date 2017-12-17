@@ -1,23 +1,39 @@
 package com.smartg.java.util;
 
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class StackTraceUtil {
 
-
     private static final boolean traceMethodCalls = true;
 
     public static String getStackTraceLine() {
-        return getStackTraceLine(1);
+        return getStackTraceLine(0);
     }
 
     private static String getStackTraceLine(final int line) {
-        return new Exception().getStackTrace()[line].toString();
+        StackTraceElement[] stackTrace = new Exception().getStackTrace();
+        return stackTrace[getFirstLine(stackTrace) + line].toString();
     }
 
     public static String getStackTraceLine(Throwable t) {
-        return t.getStackTrace()[0].toString();
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        return stackTrace[getFirstLine(stackTrace)].toString();
+    }
+
+    public static String getStackTraceLine(Throwable t, int count) {
+        StringBuilder sb = new StringBuilder();
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        int firstLine = getFirstLine(stackTrace);
+        for (int i = 0; i < count; i++) {
+            int n = firstLine + i;
+            if (n < stackTrace.length) {
+                sb.append(stackTrace[n].toString());
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     public static void trace() {
@@ -32,58 +48,82 @@ public class StackTraceUtil {
         if (traceMethodCalls) {
             final Exception exception = new Exception();
             StackTraceElement[] stackTrace = exception.getStackTrace();
+            int firstLine = getFirstLine(stackTrace);
             for (int i = 0; i < n; i++) {
-                int index = first + i;
+                int index = firstLine + first + i;
                 if (index < stackTrace.length) {
                     String s = stackTrace[index].toString();
-                    getLogger().log(Level.INFO, s);
+                    Logger.getLogger("Labworks").log(Level.INFO, s);
                 }
             }
-            getLogger().log(Level.INFO, "--------------------------");
+            Logger.getLogger("Labworks").log(Level.INFO, "--------------------------");
         }
     }
 
     public static void severe(Throwable ex) {
-        log(Level.SEVERE, ex);
+        log(Level.SEVERE, ex, 5);
     }
-    
+
+    public static void severe(Throwable ex, int count) {
+        log(Level.SEVERE, ex, count);
+    }
+
     public static void warning(Throwable ex) {
         log(Level.WARNING, ex);
     }
-    
+
     public static void warning(String message) {
-        log(3, Level.WARNING, message);
+        log(Level.WARNING, message);
     }
 
     public static void log(Level level, String message, Throwable ex) {
-        getLogger().log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex)});
+        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex)});
     }
 
-	private static Logger getLogger() {
-		return Logger.getGlobal();
-	}
+    public static void log(Level level, String message, Throwable ex, int lineCount) {
+        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex, 5)});
+    }
 
     public static void log(Level level, Throwable ex) {
-        getLogger().log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex)});
+        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex)});
+    }
+
+    public static void log(Level level, Throwable ex, int lineCount) {
+        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex, lineCount)});
     }
 
     public static void log(Level level, String message) {
-    	log(2, level, message);
+        Logger.getLogger("Labworks").log(level, message + " at {0}", StackTraceUtil.getStackTraceLine());
     }
-    
-    public static void log(int line, Level level, String message) {
-        getLogger().log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(line));
-    }
-
 
     public static void log(Level level, String message, int lineCount) {
-        for (int line = 0; line < lineCount; line++) {
-            getLogger().log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(2 + line));
+        for (int line = 1; line <= lineCount; line++) {
+            Logger.getLogger("Labworks").log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(line));
         }
     }
 
     public static void log(Level level, String message, Object param) {
-        getLogger().log(level, message + " {0} at {1}", new Object[]{param, StackTraceUtil.getStackTraceLine(2)});
+        Logger.getLogger("Labworks").log(level, message + " {0} at {1}", new Object[]{param, StackTraceUtil.getStackTraceLine()});
     }
 
+    private static int getFirstLine() {
+        return getFirstLine(new Exception().getStackTrace());
+    }
+
+    private static int getFirstLine(StackTraceElement[] elements) {
+        for (int i = 0; i < elements.length; i++) {
+            if (elements[i].getClassName().equalsIgnoreCase(StackTraceUtil.class.getName())) {
+                continue;
+            }
+            return i;
+        }
+        return -1;
+    }
+
+    public static <T> T measureTime(Supplier<T> s, String message) {
+        long t = System.currentTimeMillis();
+        T get = s.get();
+        log(Level.INFO, message + ": " + (System.currentTimeMillis() - t) + "ms");
+        return get;
+    }
 }

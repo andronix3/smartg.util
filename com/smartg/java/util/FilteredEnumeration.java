@@ -40,48 +40,54 @@ import java.util.Iterator;
  */
 public abstract class FilteredEnumeration<E> implements Enumeration<E>, Iterator<E>, IFilter<E> {
 
-    private final Enumeration<E> e;
+	private final Enumeration<E> e;
 
-    public boolean hasNext() {
-	return next != null;
-    }
-
-    public E next() {
-	E nxt = next;
-	next = getNext(e);
-	return nxt;
-    }
-
-    public void remove() {
-	throw new UnsupportedOperationException();
-    }
-
-    private E next;
-
-    public FilteredEnumeration(Enumeration<E> e) {
-	this.e = e;
-	next = getNext(e);
-    }
-
-    private E getNext(Enumeration<E> e) {
-	while (e.hasMoreElements()) {
-	    E obj = e.nextElement();
-	    if (obj != null && accept(obj)) {
-		return obj;
-	    }
+	@Override
+	public boolean hasNext() {
+		return next != null;
 	}
-	return null;
-    }
 
-    public boolean hasMoreElements() {
-	return next != null;
-    }
+	@Override
+	public E next() {
+		E nxt = next;
+		next = getNext(e);
+		return nxt;
+	}
 
-    public E nextElement() {
-	E nxt = next;
-	next = getNext(e);
-	return nxt;
-    }
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
+	}
 
-    public abstract boolean accept(E obj);
+	private E next;
+
+	public FilteredEnumeration(Enumeration<E> e) {
+		this.e = e;
+		next = getNext(e);
+	}
+
+	private E getNext(Enumeration<E> e) {
+		while (e.hasMoreElements()) {
+			E obj = e.nextElement();
+			if (obj != null && accept(obj)) {
+				return obj;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean hasMoreElements() {
+		return next != null;
+	}
+
+	@Override
+	public E nextElement() {
+		E nxt = next;
+		next = getNext(e);
+		return nxt;
+	}
+
+	@Override
+	public abstract boolean accept(E obj);
 }

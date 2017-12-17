@@ -20,6 +20,7 @@ public class ZipCompressor implements AutoCloseable {
 
 	public ZipCompressor(File destination) throws FileNotFoundException {
 		this(destination, ZipOutputStream.DEFLATED, 9);
+		System.out.println(destination);
 	}
 
 	public ZipCompressor(File destination, int method, int level) throws FileNotFoundException {
@@ -34,7 +35,6 @@ public class ZipCompressor implements AutoCloseable {
 
 	public void add(Path f, List<Path> exclusion) throws IOException {
 		this.exclusion = exclusion;
-		setUserDir(f.getParent());
 		if (!f.toFile().isDirectory()) {
 			put(f);
 		} else {
@@ -70,7 +70,7 @@ public class ZipCompressor implements AutoCloseable {
 	private void addDirectory(File dir) throws IOException {
 		File[] files = dir.listFiles();
 		for (File f : files) {
-			if (exclusion != null || !exclusion.contains(f)) {
+			if (exclusion == null || !exclusion.contains(f)) {
 				if (f.isDirectory()) {
 					addDirectory(f);
 				} else {
@@ -80,7 +80,8 @@ public class ZipCompressor implements AutoCloseable {
 		}
 	}
 
-	private void setUserDir(Path userDir) {
+	public void setUserDir(Path userDir) {
+		System.out.println("setUserDir: " + userDir);
 		this.userDir = userDir;
 	}
 
