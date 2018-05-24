@@ -1,129 +1,240 @@
 package com.smartg.java.util;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class StackTraceUtil {
 
-    private static final boolean traceMethodCalls = true;
+	private static final boolean traceMethodCalls = true;
+	private static Set<String> stackSet = new HashSet<>();
 
-    public static String getStackTraceLine() {
-        return getStackTraceLine(0);
-    }
+	public static String getStackTraceLine() {
+		return getStackTraceLine(0);
+	}
 
-    private static String getStackTraceLine(final int line) {
-        StackTraceElement[] stackTrace = new Exception().getStackTrace();
-        return stackTrace[getFirstLine(stackTrace) + line].toString();
-    }
+	private static String getStackTraceLine(final int line) {
+		StackTraceElement[] stackTrace = new Exception().getStackTrace();
+		return stackTrace[getFirstLine(stackTrace) + line].toString();
+	}
 
-    public static String getStackTraceLine(Throwable t) {
-        StackTraceElement[] stackTrace = t.getStackTrace();
-        return stackTrace[getFirstLine(stackTrace)].toString();
-    }
+	public static String getStackTraceLine(StackTraceElement[] stackTrace, int count, int firstLine) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < count; i++) {
+			int n = firstLine + i;
+			if (n < stackTrace.length) {
+				sb.append(stackTrace[n].toString());
+				sb.append("\n");
+			}
+		}
+		return sb.toString();
+	}
 
-    public static String getStackTraceLine(Throwable t, int count) {
-        StringBuilder sb = new StringBuilder();
-        StackTraceElement[] stackTrace = t.getStackTrace();
-        int firstLine = getFirstLine(stackTrace);
-        for (int i = 0; i < count; i++) {
-            int n = firstLine + i;
-            if (n < stackTrace.length) {
-                sb.append(stackTrace[n].toString());
-                sb.append("\n");
-            }
-        }
-        return sb.toString();
-    }
+	public static void trace() {
+		trace(2, 1);
+	}
 
-    public static void trace() {
-        trace(2, 1);
-    }
+	public static void trace(int first) {
+		trace(first, 1);
+	}
 
-    public static void trace(int first) {
-        trace(first, 1);
-    }
+	public static void trace(int first, int n) {
+		if (traceMethodCalls) {
+			Builder builder = new Builder();
+			FST_Exception ex = new FST_Exception(first, first + n, new Throwable());
+			builder.getLogger().log(Level.INFO, ex.toString());
+			builder.getLogger().log(Level.INFO, "--------------------------");
+		}
+	}
 
-    public static void trace(int first, int n) {
-        if (traceMethodCalls) {
-            final Exception exception = new Exception();
-            StackTraceElement[] stackTrace = exception.getStackTrace();
-            int firstLine = getFirstLine(stackTrace);
-            for (int i = 0; i < n; i++) {
-                int index = firstLine + first + i;
-                if (index < stackTrace.length) {
-                    String s = stackTrace[index].toString();
-                    Logger.getLogger("Labworks").log(Level.INFO, s);
-                }
-            }
-            Logger.getLogger("Labworks").log(Level.INFO, "--------------------------");
-        }
-    }
+	public static void severe(Throwable ex) {
+		log(Level.SEVERE, ex, 5);
+	}
 
-    public static void severe(Throwable ex) {
-        log(Level.SEVERE, ex, 5);
-    }
+	public static void severe(Throwable ex, int count) {
+		log(Level.SEVERE, ex, count);
+	}
 
-    public static void severe(Throwable ex, int count) {
-        log(Level.SEVERE, ex, count);
-    }
+	public static void warning(Throwable ex) {
+		log(Level.WARNING, ex);
+	}
 
-    public static void warning(Throwable ex) {
-        log(Level.WARNING, ex);
-    }
+	public static void warning(String message) {
+		log(Level.WARNING, message);
+	}
 
-    public static void warning(String message) {
-        log(Level.WARNING, message);
-    }
+	public static void warning(String message, int lineCount) {
+		log(Level.WARNING, message, lineCount);
+	}
 
-    public static void log(Level level, String message, Throwable ex) {
-        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex)});
-    }
+	public static void log(Level level, String message, Throwable ex) {
+		Builder builder = new Builder().setException(ex);
+		builder.log(level, " {0} at {1}", new Object[] { message, builder.toString() });
+	}
 
-    public static void log(Level level, String message, Throwable ex, int lineCount) {
-        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{message, StackTraceUtil.getStackTraceLine(ex, 5)});
-    }
+	public static void log(Level level, String message, Throwable ex, int lineCount) {
+		Builder builder = new Builder().setException(ex).setLineCount(lineCount);
+		builder.log(level, " {0} at {1}", new Object[] { message, builder.toString() });
+	}
 
-    public static void log(Level level, Throwable ex) {
-        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex)});
-    }
+	public static void log(Level level, Throwable ex) {
+		Builder builder = new Builder().setException(ex);
+		builder.log(level, " {0} at {1}", new Object[] { ex.getMessage(), builder.toString() });
+	}
 
-    public static void log(Level level, Throwable ex, int lineCount) {
-        Logger.getLogger("Labworks").log(level, " {0} at {1}", new Object[]{ex.getMessage(), StackTraceUtil.getStackTraceLine(ex, lineCount)});
-    }
+	public static void log(Level level, Throwable ex, int lineCount) {
+		Builder builder = new Builder().setException(ex).setLineCount(lineCount);
+		builder.log(level, " {0} at {1}", new Object[] { ex.getMessage(), builder.toString() });
+	}
 
-    public static void log(Level level, String message) {
-        Logger.getLogger("Labworks").log(level, message + " at {0}", StackTraceUtil.getStackTraceLine());
-    }
+	public static void log(Level level, String message) {
+		Builder builder = new Builder();
+		builder.log2(level, message + " at {0}");
+	}
 
-    public static void log(Level level, String message, int lineCount) {
-        for (int line = 1; line <= lineCount; line++) {
-            Logger.getLogger("Labworks").log(level, message + " at {0}", StackTraceUtil.getStackTraceLine(line));
-        }
-    }
+	public static void log(Level level, String message, int lineCount) {
+		Builder builder = new Builder().setLineCount(lineCount);
+		builder.log(level, message);
+	}
 
-    public static void log(Level level, String message, Object param) {
-        Logger.getLogger("Labworks").log(level, message + " {0} at {1}", new Object[]{param, StackTraceUtil.getStackTraceLine()});
-    }
+	private static boolean isUnique(String message) {
+		return stackSet.add(message);
+	}
 
-    private static int getFirstLine() {
-        return getFirstLine(new Exception().getStackTrace());
-    }
+	public static void log(Level level, String message, Object param) {
+		Builder builder = new Builder();
+		builder.log(level, message + " {0} at {1}", new Object[] { param, builder.toString() });
+	}
 
-    private static int getFirstLine(StackTraceElement[] elements) {
-        for (int i = 0; i < elements.length; i++) {
-            if (elements[i].getClassName().equalsIgnoreCase(StackTraceUtil.class.getName())) {
-                continue;
-            }
-            return i;
-        }
-        return -1;
-    }
+	static class Builder {
+		int lineCount = 1;
+		private Throwable exception;
+		private boolean unique = true;
 
-    public static <T> T measureTime(Supplier<T> s, String message) {
-        long t = System.currentTimeMillis();
-        T get = s.get();
-        log(Level.INFO, message + ": " + (System.currentTimeMillis() - t) + "ms");
-        return get;
-    }
+		private StackTraceElement[] elements;
+		private String className;
+		private Integer firstLine;
+
+		public int getLineCount() {
+			return lineCount;
+		}
+
+		public Builder setLineCount(int lineCount) {
+			this.lineCount = lineCount;
+			return this;
+		}
+		
+		private void checkFirstLine() {
+			checkElements();
+			if(firstLine == null) {
+				firstLine = StackTraceUtil.getFirstLine(elements);
+			}
+		}
+		
+		private void checkElements() {
+			if(elements == null) {
+				elements = getException().getStackTrace();
+			}
+		}
+
+		public void setUnique(boolean unique) {
+			this.unique = unique;
+		}
+
+		public int getFirstLine() {
+			return firstLine;
+		}
+
+		public Throwable getException() {
+			if (exception == null) {
+				exception = new Throwable();
+			}
+			return exception;
+		}
+
+		public Builder setException(Throwable exception) {
+			this.exception = exception;
+			return this;
+		}
+
+		public String getClassName() {
+			return className;
+		}
+
+		public Logger getLogger() {
+			this.elements = getException().getStackTrace();
+			this.firstLine = StackTraceUtil.getFirstLine(this.elements);
+			// this.stackTraceLine = StackTraceUtil.getStackTraceLine(elements, lineCount,
+			// firstLine);
+			return Logger.getLogger(this.elements[firstLine].getClassName());
+		}
+
+		@Override
+		public String toString() {
+			checkFirstLine();
+			checkElements();
+			StringBuilder sb = new StringBuilder();
+			int max = Math.min(firstLine + lineCount + 1, elements.length);
+			for (int i = firstLine; i < max; i++) {
+				sb.append(elements[i].toString());
+				sb.append("\n");
+			}
+			return sb.toString();
+		}
+
+		public void log(Level level) {
+			String line = getStackTraceLine();
+			if (!unique || StackTraceUtil.isUnique(line)) {
+				getLogger().log(level, line);
+			}
+		}
+
+		public void log(Level level, String msg) {
+			String message = msg + " at \n" + toString();
+			if (!unique || StackTraceUtil.isUnique(message)) {
+				getLogger().log(level, message);
+			}
+		}
+
+		public void log2(Level level, String msg) {
+			String message = toString();
+			if (!unique || StackTraceUtil.isUnique(msg + message)) {
+				getLogger().log(level, msg + " at {0}", message);
+			}
+		}
+
+		public void log(Level level, String msg, Object params[]) {
+			String line = getStackTraceLine();
+			if (!unique || StackTraceUtil.isUnique(line)) {
+				getLogger().log(level, msg + " {0} at {1}", new Object[] { params, toString() });
+			}
+		}
+	}
+
+	private static int getFirstLine(StackTraceElement[] elements) {
+		for (int i = 0; i < elements.length; i++) {
+			String className = elements[i].getClassName();
+			if (className.equalsIgnoreCase(StackTraceUtil.class.getName())
+					|| className.equalsIgnoreCase(Builder.class.getName())) {
+				continue;
+			}
+			return i;
+		}
+		return -1;
+	}
+
+	public static <T> T measureTime(Supplier<T> s, String message) {
+		long t = System.currentTimeMillis();
+		T get = s.get();
+		log(Level.INFO, message + ": " + (System.currentTimeMillis() - t) + "ms");
+		return get;
+	}
+
+	public static void measureTime(Runnable r, String message) {
+		long t = System.currentTimeMillis();
+		r.run();
+		log(Level.INFO, message + ": " + (System.currentTimeMillis() - t) + "ms");
+	}
 }
