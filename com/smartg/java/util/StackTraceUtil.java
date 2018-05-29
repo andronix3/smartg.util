@@ -91,7 +91,7 @@ public class StackTraceUtil {
 
 	public static void log(Level level, String message) {
 		Builder builder = new Builder();
-		builder.log2(level, message + " at {0}");
+		builder.log(level, message);
 	}
 
 	public static void log(Level level, String message, int lineCount) {
@@ -125,16 +125,16 @@ public class StackTraceUtil {
 			this.lineCount = lineCount;
 			return this;
 		}
-		
+
 		private void checkFirstLine() {
 			checkElements();
-			if(firstLine == null) {
+			if (firstLine == null) {
 				firstLine = StackTraceUtil.getFirstLine(elements);
 			}
 		}
-		
+
 		private void checkElements() {
-			if(elements == null) {
+			if (elements == null) {
 				elements = getException().getStackTrace();
 			}
 		}
@@ -226,15 +226,29 @@ public class StackTraceUtil {
 	}
 
 	public static <T> T measureTime(Supplier<T> s, String message) {
+		return measureTime(s, message, 0);
+	}
+
+	public static <T> T measureTime(Supplier<T> s, String message, long interval) {
 		long t = System.currentTimeMillis();
 		T get = s.get();
-		log(Level.INFO, message + ": " + (System.currentTimeMillis() - t) + "ms");
+		long m = System.currentTimeMillis() - t;
+		if (m > interval) {
+			log(Level.INFO, message + ": " + m + "ms");
+		}
 		return get;
 	}
 
 	public static void measureTime(Runnable r, String message) {
+		measureTime(r, message, 0);
+	}
+
+	public static void measureTime(Runnable r, String message, long interval) {
 		long t = System.currentTimeMillis();
 		r.run();
-		log(Level.INFO, message + ": " + (System.currentTimeMillis() - t) + "ms");
+		long m = System.currentTimeMillis() - t;
+		if (m > interval) {
+			log(Level.INFO, message + ": " + m + "ms");
+		}
 	}
 }
