@@ -52,10 +52,6 @@ public abstract class ProxyGraphics extends Graphics2D {
     
     abstract protected Graphics2D get();
 
-//    public Graphics create() {
-//        return new ProxyGraphics((Graphics2D) get().create());
-//    }
-
     public void translate(int x, int y) {
         get().translate(x, y);
     }

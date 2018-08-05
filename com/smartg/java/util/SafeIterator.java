@@ -34,8 +34,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 /**
- * Helps to prevent NullPointerException from Iterators which may
- * return NULL from next().
+ * Helps to prevent NullPointerException from Iterators which may return NULL
+ * from next().
  * 
  * @author andrey
  *
@@ -43,45 +43,44 @@ import java.util.Iterator;
  */
 public class SafeIterator<E> implements Enumeration<E>, Iterator<E> {
 
-    private Iterator<E> e;
+	private Iterator<E> e;
 
-    private E next;
+	private E next;
 
-    public SafeIterator(Iterator<E> e) {
-	this.e = e;
-	goNext();
-    }
-
-    public boolean hasMoreElements() {
-	return next != null;
-    }
-
-    public E nextElement() {
-	E nxt = next;
-	next = null;
-	goNext();
-	return nxt;
-    }
-    
-    public boolean hasNext() {
-	return next != null;
-    }
-
-    public E next() {
-	E nxt = next;
-	next = null;
-	goNext();
-	return nxt;
-    }
-
-    public void remove() {
-	throw new UnsupportedOperationException();
-    }
-
-
-    private void goNext() {
-	while (e.hasNext() && next == null) {
-	    next = e.next();
+	public SafeIterator(Iterator<E> e) {
+		this.e = e;
+		goNext();
 	}
-    }
+
+	public boolean hasMoreElements() {
+		return next != null;
+	}
+
+	public E nextElement() {
+		E nxt = next;
+		next = null;
+		goNext();
+		return nxt;
+	}
+
+	public boolean hasNext() {
+		return next != null;
+	}
+
+	public E next() {
+		E nxt = next;
+		next = null;
+		goNext();
+		return nxt;
+	}
+
+	public void remove() {
+		e.remove();
+	}
+
+	private void goNext() {
+		while (e.hasNext() && next == null) {
+			next = e.next();
+		}
+	}
 }
