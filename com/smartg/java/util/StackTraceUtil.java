@@ -179,7 +179,12 @@ public class StackTraceUtil {
             this.firstLine = StackTraceUtil.getFirstLine(this.elements);
             // this.stackTraceLine = StackTraceUtil.getStackTraceLine(elements, lineCount,
             // firstLine);
-            return Logger.getLogger(this.elements[firstLine].getClassName());
+            try {
+            	return Logger.getLogger(this.elements[firstLine].getClassName());
+            }
+            catch(Throwable t) {
+            	return Logger.getGlobal();
+            }
         }
 
         @Override
