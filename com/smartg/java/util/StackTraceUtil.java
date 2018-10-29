@@ -91,7 +91,11 @@ public class StackTraceUtil {
 
     public static void log(Level level, Throwable ex) {
         Builder builder = new Builder().setException(ex);
-        builder.log(level, ex.getMessage() + " at {0}", new Object[]{builder.toString()});
+        String message = ex.getMessage();
+        if(message == null) {
+        	message = "";
+        }
+		builder.log(level, message + " at {0}", new Object[]{builder.toString()});
     }
 
     public static void log(Level level, Throwable ex, int lineCount) {
@@ -127,6 +131,10 @@ public class StackTraceUtil {
         private StackTraceElement[] elements;
         private String className;
         private Integer firstLine;
+        
+        public Builder() {
+        	className = "";
+        }
 
         public int getLineCount() {
             return lineCount;
