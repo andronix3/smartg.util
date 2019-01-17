@@ -32,15 +32,20 @@ package com.smartg.java.util;
 
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Allows to filter values of Iterator.
  *
  * @param <E>
  */
-public abstract class FilteredIterator<E> implements Enumeration<E>, Iterator<E>, IFilter<E> {
+public class FilteredIterator<E> implements Enumeration<E>, Iterator<E> {
 
-	private final Iterator<E> e;
+	private final Iterator<E> iterator;
+	private final Predicate<E> predicate;
+
+	private E next;
 
 	@Override
 	public boolean hasNext() {
@@ -50,7 +55,7 @@ public abstract class FilteredIterator<E> implements Enumeration<E>, Iterator<E>
 	@Override
 	public E next() {
 		E nxt = next;
-		next = getNext(e);
+		next = getNext(iterator);
 		return nxt;
 	}
 
@@ -59,17 +64,16 @@ public abstract class FilteredIterator<E> implements Enumeration<E>, Iterator<E>
 		throw new UnsupportedOperationException();
 	}
 
-	private E next;
-
-	public FilteredIterator(Iterator<E> e) {
-		this.e = e;
-		next = getNext(e);
+	public FilteredIterator(Iterator<E> e, Predicate<E> p) {
+		this.iterator = Objects.requireNonNull(e);
+		this.predicate = Objects.requireNonNull(p);
+		this.next = getNext(e);
 	}
 
 	private E getNext(Iterator<E> e) {
 		while (e.hasNext()) {
 			E obj = e.next();
-			if (obj != null && accept(obj)) {
+			if (obj != null && predicate.test(obj)) {
 				return obj;
 			}
 		}
@@ -84,10 +88,7 @@ public abstract class FilteredIterator<E> implements Enumeration<E>, Iterator<E>
 	@Override
 	public E nextElement() {
 		E nxt = next;
-		next = getNext(e);
+		next = getNext(iterator);
 		return nxt;
 	}
-
-	@Override
-	public abstract boolean accept(E obj);
 }
