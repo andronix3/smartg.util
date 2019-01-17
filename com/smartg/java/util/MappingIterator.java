@@ -1,6 +1,7 @@
 package com.smartg.java.util;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -16,8 +17,8 @@ public class MappingIterator<T, E> implements Iterator<E> {
 	private Iterator<T> iterator;
 
 	public MappingIterator(Function<T, E> mapper, Iterator<T> iterator) {
-		this.mapper = mapper;
-		this.iterator = iterator;
+		this.mapper = Objects.requireNonNull(mapper);
+		this.iterator = Objects.requireNonNull(iterator);
 	}
 
 	@Override
