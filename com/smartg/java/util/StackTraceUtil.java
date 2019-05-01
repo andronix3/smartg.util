@@ -12,16 +12,16 @@ import java.util.logging.Logger;
 public class StackTraceUtil {
 
 	private static final boolean traceMethodCalls = true;
-	private static Set<String> stackSet = new HashSet<>();
+	private static final Set<String> stackSet = new HashSet<>();
 
 	private static boolean filterIdenticalMessages;
-	private static String[] ignoredPackages = { "com.sun", "com.oracle", "java.lang", "javax", "java.applet",
+	private static final String[] ignoredPackages = { "com.sun", "com.oracle", "java.lang", "javax", "java.applet",
 			"java.awt", "java.beans", "java.io", "java.net", "java.math", "java.nio", "java.rmi", "java.security",
 			"java.sql", "java.text", "java.time", "java.util", "jdk.internal", "jdk.management", "jdk.net", "org.ietf",
 			"org.jcp", "org.omg", "org.w3c", "org.xml", "sun.applet", "sun.awt", "sun.audio", "sun.corba", "sun.dc",
 			"sun.font", "sun.invoke", "sun.io", "sun.java2d", "sun.launcher", "sun.management", "sun.misc", "sun.net",
 			"sun.nio", "sun.print", "sun.reflect", "sun.rmi", "sun.security", "sun.swing", "sun.text", "sun.tools",
-			"sun.tracing", "sun.util"
+			"sun.tracing", "sun.util", "javafx.event", "javafx.beans", "javafx.scene", "com.sybase" 
 	};
 	
 	private static List<String> ignoredList = new ArrayList<>(Arrays.asList(ignoredPackages));
@@ -96,32 +96,52 @@ public class StackTraceUtil {
 		log(Level.WARNING, message);
 	}
 
+        public static void warningIfNull(Object obj, String message) {
+            if(obj == null) {
+                log(Level.WARNING, message);
+            }
+	}
+
+        public static void warningIfNotNull(Object obj, String message) {
+            if(obj != null) {
+                log(Level.WARNING, message);
+            }
+	}
+
 	public static void warning(String message, int lineCount) {
 		log(Level.WARNING, message, lineCount);
 	}
 
+        public static void warningIfNull(Object obj, String message, int lineCount) {
+            if(obj == null) {
+                log(Level.WARNING, message, lineCount);
+            }
+	}
+        
+        public static void warningIfNotNull(Object obj, String message, int lineCount) {
+            if(obj != null) {
+                log(Level.WARNING, message, lineCount);
+            }
+	}
+
 	public static void log(Level level, String message, Throwable ex) {
 		Builder builder = new Builder().setException(ex);
-		builder.log(level, message + " at {0}", new Object[] { builder.toString() });
+		builder.log(level, message, new Object[] { ex.getMessage() });
 	}
 
 	public static void log(Level level, String message, Throwable ex, int lineCount) {
 		Builder builder = new Builder().setException(ex).setLineCount(lineCount);
-		builder.log(level, message + " at {0}", new Object[] { builder.toString() });
+		builder.log(level, message, new Object[] { ex.getMessage()});
 	}
 
 	public static void log(Level level, Throwable ex) {
 		Builder builder = new Builder().setException(ex);
-		String message = ex.getMessage();
-		if (message == null) {
-			message = "";
-		}
-		builder.log(level, message + " at {0}", new Object[] { builder.toString() });
+		builder.log(level, "", new Object[] { ex.getMessage() });
 	}
 
 	public static void log(Level level, Throwable ex, int lineCount) {
 		Builder builder = new Builder().setException(ex).setLineCount(lineCount);
-		builder.log(level, ex.getMessage() + " at \n" + builder.toString());
+		builder.log(level, ex.getMessage());
 	}
 
 	public static void log(Level level, String message) {
@@ -137,10 +157,10 @@ public class StackTraceUtil {
 	private static boolean isUnique(String message) {
 		return stackSet.add(message);
 	}
-
+ 
 	public static void log(Level level, String message, Object param) {
 		Builder builder = new Builder();
-		builder.log(level, message + " {0} at {1}", new Object[] { param, builder.toString() });
+		builder.log(level, " {0} at {1}", new Object[] { message, param });
 	}
 
 	static class Builder {
@@ -236,8 +256,8 @@ public class StackTraceUtil {
 
 		@Override
 		public String toString() {
-			checkFirstLine();
 			checkElements();
+			checkFirstLine();
 			StringBuilder sb = new StringBuilder();
 			int max = Math.min(firstLine + lineCount + 1, elements.length);
 			for (int i = firstLine; i < max; i++) {
