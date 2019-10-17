@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StackTraceUtil {
 
@@ -162,6 +164,13 @@ public class StackTraceUtil {
 		Builder builder = new Builder();
 		builder.log(level, " {0} at {1}", new Object[] { message, param });
 	}
+        
+        public static String toString(Throwable t) {
+            Builder builder = new Builder();
+            builder.setException(t);
+            StackTraceElement[] elements = builder.getElements();
+            return Stream.of(elements).map(e-> e.toString()).collect(Collectors.joining("\n"));
+        }
 
 	static class Builder {
 
@@ -317,7 +326,7 @@ public class StackTraceUtil {
 		T get = s.get();
 		long m = System.currentTimeMillis() - t;
 		if (m > interval) {
-			log(Level.INFO, message + ": " + m + "ms");
+			log(Level.WARNING, message + ": " + m + "ms");
 		}
 		return get;
 	}
