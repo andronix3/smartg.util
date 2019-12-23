@@ -237,7 +237,7 @@ public class StackTraceUtil {
 
 		public Throwable getException() {
 			if (exception == null) {
-				exception = new Throwable();
+				exception = new IgnoredException();
 			}
 			return exception;
 		}
@@ -292,6 +292,13 @@ public class StackTraceUtil {
 
 		public void log2(Level level, String msg) {
 			String message = toString();
+			if(msg == null) {
+				msg = "";
+			}
+			if(!(getException() instanceof IgnoredException)) {
+				msg = getException().getClass().getName() + "\n" + msg;
+			}
+			
 			if (!unique || StackTraceUtil.isUnique(msg + message)) {
 				getLogger().log(level, msg + " at {0}", message);
 			}
@@ -342,5 +349,9 @@ public class StackTraceUtil {
 		if (m > interval) {
 			log(Level.INFO, message + ": " + m + "ms");
 		}
+	}
+	
+	static class IgnoredException extends Exception {
+		
 	}
 }
