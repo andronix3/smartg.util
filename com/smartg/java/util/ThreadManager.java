@@ -185,7 +185,7 @@ public class ThreadManager extends EventSource implements Executor {
      * check if this task is already in queue
      *
      * @param r Runnable task to check
-     * @return true if specified job is alredy in job queue or is in progress
+     * @return true if specified job is already in job queue or is in progress
      * (running)
      */
     public boolean hasTask(Runnable r) {
@@ -210,10 +210,6 @@ public class ThreadManager extends EventSource implements Executor {
             runner.stopMe();
         }
         wakeUp();
-        // for (int i = 0; i < runners.length; i++) {
-        // runners[i] = null;
-        // }
-        // runners = null;
     }
 
     public void setPaused(boolean p) {
@@ -226,7 +222,7 @@ public class ThreadManager extends EventSource implements Executor {
     }
 
     /**
-     * If paused - let each Thread make next job and pause again, noop
+     * If paused - let each Thread make next job and pause again, do nothing
      * otherwise.
      */
     public void doNext() {
@@ -260,7 +256,7 @@ public class ThreadManager extends EventSource implements Executor {
                     return runen.nextElement();
                 }
                 tasks.remove(0);
-                post(new TM_Event(this, runen, TM_Event.Type.EnumerationExited));
+                post(new TM_Event(this, runen.getName(), TM_Event.Type.EnumerationExited));
                 return next();
             }
             tasks.remove(0);
@@ -322,7 +318,7 @@ public class ThreadManager extends EventSource implements Executor {
 
         @Override
         public String getName() {
-            return null;
+            return name;
         }
 
         @Override
@@ -358,7 +354,7 @@ public class ThreadManager extends EventSource implements Executor {
             this.type = Type.QueueEmpty;
         }
 
-        public TM_Event(EventSource source, Runnable command, Type type) {
+        public TM_Event(EventSource source, String command, Type type) {
             super(source, command);
             this.type = type;
         }
@@ -477,7 +473,7 @@ public class ThreadManager extends EventSource implements Executor {
 
     class Runner extends Thread {
 
-        protected int num;
+        protected final int num;
         volatile boolean stopped;
         volatile boolean paused;
         volatile boolean doNext;
@@ -508,14 +504,17 @@ public class ThreadManager extends EventSource implements Executor {
             while (!isStopped()) {
                 if (!paused || doNext) {
                     doNext = false;
-                    current[num] = nextTask();
-                    if (current[num] != null) {
+                    RunnablePlus nextTask = nextTask();
+					current[num] = nextTask;
+                    if (nextTask != null) {
                         try {
-                            current[num].run();
-                            current[num] = null;
+                        	post(new TM_Event(ThreadManager.this, nextTask.getName(), TM_Event.Type.RunnableStarted));
+                            nextTask.run();
                         } catch (Throwable ex) {
-                            current[num] = null;
                             StackTraceUtil.warning(ex);
+                        } finally {
+                        	current[num] = null;
+                        	post(new TM_Event(ThreadManager.this, nextTask.getName(), TM_Event.Type.RunnableExited));
                         }
                     } else {
                         doWait();
