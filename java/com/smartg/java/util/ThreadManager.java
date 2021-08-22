@@ -345,8 +345,8 @@ public class ThreadManager extends EventSource implements Executor {
 
     public static class TM_Event extends VEvent {
 
-        public enum Type {
-            RunnableStarted, RunnableExited, EnumerationStarted, EnumerationExited, QueueEmpty
+        public static enum Type {
+        	TaskAdded, RunnableStarted, RunnableExited, EnumerationStarted, EnumerationExited, QueueEmpty, QueueSize, TaskCount
         }
 
         public final Type type;
@@ -428,49 +428,63 @@ public class ThreadManager extends EventSource implements Executor {
             TM_Event tm = (TM_Event) e;
             switch (tm.type) {
                 case EnumerationExited:
-                    enumerationExited((Enumeration<Runnable>) tm.getCommand());
+                    enumerationExited("" + tm.getCommand());
                     break;
                 case EnumerationStarted:
-                    enumerationStarted((Enumeration<Runnable>) tm.getCommand());
+                    enumerationStarted("" + tm.getCommand());
                     break;
                 case QueueEmpty:
                     queueEmpty();
                     break;
                 case RunnableExited:
-                    runnableExited((Runnable) tm.getCommand());
+                    runnableExited("" + tm.getCommand());
                     break;
                 case RunnableStarted:
-                    runnableStarted((Runnable) tm.getCommand());
+                    runnableStarted("" + tm.getCommand());
                     break;
+			case TaskAdded:
+
+				break;
+			default:
+				break;
             }
         }
 
         /**
          * @param e
          */
-        public void enumerationExited(Enumeration<Runnable> e) {
+        public void enumerationExited(String message) {
         }
 
         /**
          * @param e
          */
-        public void enumerationStarted(Enumeration<Runnable> e) {
+        public void enumerationStarted(String message) {
         }
 
         /**
          * @param r
          */
-        public void runnableStarted(Runnable r) {
+        public void runnableStarted(String message) {
+        }
+
+        public void taskAdded(String message) {
+
         }
 
         /**
          * @param r
          */
-        public void runnableExited(Runnable r) {
+        public void runnableExited(String message) {
         }
 
         public void queueEmpty() {
         }
+
+        public void queueSize(int size) {
+        }
+
+
     }
 
     class Runner extends Thread {
@@ -511,12 +525,14 @@ public class ThreadManager extends EventSource implements Executor {
                     if (nextTask != null) {
                         try {
                         	post(new TM_Event(ThreadManager.this, nextTask.getName(), TM_Event.Type.RunnableStarted));
+                        	post(new TM_Event(ThreadManager.this, "" + tasks.size(), TM_Event.Type.QueueSize));
                             nextTask.run();
                         } catch (Throwable ex) {
                             StackTraceUtil.warning(ex);
                         } finally {
                         	current[num] = null;
                         	post(new TM_Event(ThreadManager.this, nextTask.getName(), TM_Event.Type.RunnableExited));
+                        	post(new TM_Event(ThreadManager.this, "" + tasks.size(), TM_Event.Type.QueueSize));
                         }
                     } else {
                         doWait();
