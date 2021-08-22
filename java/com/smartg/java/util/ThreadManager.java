@@ -451,19 +451,19 @@ public class ThreadManager extends EventSource implements Executor {
         }
 
         /**
-         * @param e
+         * @param message
          */
         public void enumerationExited(String message) {
         }
 
         /**
-         * @param e
+         * @param message
          */
         public void enumerationStarted(String message) {
         }
 
         /**
-         * @param r
+         * @param message
          */
         public void runnableStarted(String message) {
         }
@@ -473,7 +473,7 @@ public class ThreadManager extends EventSource implements Executor {
         }
 
         /**
-         * @param r
+         * @param message
          */
         public void runnableExited(String message) {
         }
@@ -483,8 +483,6 @@ public class ThreadManager extends EventSource implements Executor {
 
         public void queueSize(int size) {
         }
-
-
     }
 
     class Runner extends Thread {
